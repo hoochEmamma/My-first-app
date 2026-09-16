@@ -58,6 +58,10 @@ try {
   console.log('\napp end to end');
   const e2e = (await import('./e2e.test.mjs')).default;
   await e2e(check, BASE);
+
+  console.log('\nsubpath deployment (GitHub Pages)');
+  const subpath = (await import('./subpath.test.mjs')).default;
+  await subpath(check);
 } finally {
   try { process.kill(-server.pid); } catch { try { server.kill(); } catch { /* already gone */ } }
   await rm(join(here, '.tmp'), { recursive: true, force: true });

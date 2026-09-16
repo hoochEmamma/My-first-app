@@ -63,7 +63,12 @@ input[type='date'] { min-width: 0; }
 
 /* ----------------------------------- shell ---------------------------------- */
 
-.app { max-width: 1080px; margin: 0 auto; padding: 0 16px 64px; }
+.app {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 max(16px, env(safe-area-inset-right)) calc(64px + env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+}
 
 .topbar {
   position: sticky;
@@ -73,7 +78,7 @@ input[type='date'] { min-width: 0; }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 0;
+  padding: calc(14px + env(safe-area-inset-top)) 0 14px;
   background: var(--bg);
   border-bottom: 1px solid var(--line-soft);
 }
@@ -561,7 +566,10 @@ input[type='date'] { min-width: 0; }
 /* ----------------------------------- phone ---------------------------------- */
 
 @media (max-width: 680px) {
-  .app { padding: 0 12px 48px; }
+  .app {
+    padding: 0 max(12px, env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
   .detail { grid-template-columns: 1fr; }
   .detail-side { flex-direction: row; align-items: flex-start; gap: 14px; }
   .detail-side .cover-lg { width: 110px; min-width: 110px; }

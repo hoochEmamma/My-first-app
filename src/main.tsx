@@ -13,6 +13,18 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   });
 }
 
+/*
+ * Browsers evict ordinary site storage under pressure, and this app's entire
+ * library lives there. Asking to persist is best-effort — it is granted on
+ * engagement or once the app is installed — so the export in Settings is still
+ * the real backup.
+ */
+if (navigator.storage?.persist) {
+  navigator.storage.persist().catch(() => {
+    /* Denied or unsupported; nothing to do. */
+  });
+}
+
 const root = document.getElementById('root');
 if (root) {
   createRoot(root).render(

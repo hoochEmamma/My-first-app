@@ -79,9 +79,40 @@ Importing merges by id, then by type + title, so re-importing a backup updates e
 entries instead of duplicating them. Backups contain your library only — API keys are
 never included in the export.
 
-The app is installable: with the built version open, your browser's *Install* / *Add to
-Home Screen* option gives it an icon and its own window, and a service worker caches the
-shell so it opens with no connection.
+The app also asks the browser for persistent storage, which makes eviction less likely
+once you've installed it — but that's best-effort, not a guarantee. The export is the
+real backup.
+
+## Putting it on your phone
+
+Pushing to the default branch builds the app and publishes it to GitHub Pages via
+`.github/workflows/deploy.yml`, landing at `https://<user>.github.io/My-first-app/`.
+
+Two one-time steps in the repo:
+
+1. **Settings → Pages → Source: GitHub Actions.** The workflow also tries to turn this
+   on by itself, but flipping it manually is the reliable path.
+2. **Pages on a private repo requires a paid GitHub plan.** On a free plan the repo has
+   to be public. Publishing the code doesn't publish your library — that never leaves
+   your browser — and API keys are entered at runtime, never committed.
+
+To keep the repo private on a free plan, host the `dist/` folder somewhere else instead:
+Netlify, Vercel and Cloudflare Pages all build private repos for free. Build command
+`npm run build`, publish directory `dist`. Nothing in the app assumes GitHub Pages — it
+works from a domain root or a subpath equally.
+
+Once it's on a URL:
+
+- **iPhone (Safari):** Share → *Add to Home Screen*.
+- **Android (Chrome):** menu → *Install app* / *Add to Home screen*.
+
+You get an icon, a standalone window with no browser chrome, and the service worker keeps
+it opening with no connection. The layout accounts for the notch and home indicator.
+
+One thing to be deliberate about: a browser's storage is per-origin. `localhost:5173` and
+your Pages URL are **different origins with separate libraries**, and so are Safari on
+your phone and Chrome on your laptop. Pick the URL you'll actually use and stay on it;
+Settings → Export/Import is how you move a library between them.
 
 ## Tests
 
@@ -92,7 +123,8 @@ npm test
 Bundles the lookup module and runs it against stubbed API payloads, then builds the app
 and drives the real thing in a headless browser — adding items, type-aware progress, the
 session log, persistence across reloads, the backup round trip, phone layout, and the
-offline shell. If Playwright hasn't downloaded a browser yet, run
+offline shell. It then re-serves the build from a `/My-first-app/` subpath, the way
+GitHub Pages does, and checks nothing breaks there. If Playwright hasn't downloaded a browser yet, run
 `npx playwright install chromium` first, or point `CHROMIUM_PATH` at one you already have.
 
 The stubbed tests verify this app's parsing and error handling, not the upstream APIs —
