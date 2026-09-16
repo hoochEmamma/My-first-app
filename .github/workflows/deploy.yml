@@ -1,8 +1,18 @@
 # Builds the app and publishes it to GitHub Pages on every push.
 #
-# One-time setup in the repo: Settings → Pages → Build and deployment →
-# Source: "GitHub Actions". Pages on a private repo needs a paid GitHub plan;
-# on a free plan the repo must be public.
+# ONE-TIME SETUP, done by a human in the browser:
+#   Settings → Pages → Build and deployment → Source: "GitHub Actions"
+#
+# Until that is done, the configure-pages step below fails with:
+#   Get Pages site failed. Error: Not Found
+#   Create Pages site failed. Error: Resource not accessible by integration
+# The `enablement: true` flag asks GitHub to turn Pages on automatically, but
+# the workflow token is not always allowed to create the site, so the manual
+# step is the dependable path.
+#
+# Pages on a PRIVATE repo requires a paid GitHub plan. On a free plan the repo
+# must be public — which publishes the source, not your library: the library
+# lives in your browser and API keys are entered at runtime, never committed.
 name: Deploy to GitHub Pages
 
 on:
@@ -30,7 +40,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
