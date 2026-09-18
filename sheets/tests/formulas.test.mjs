@@ -7,6 +7,36 @@ import vm from 'node:vm';
 
 const recorded = { formulas: new Map(), validations: [], checkboxRanges: [] };
 
+/*
+ * The stub only answers to methods that genuinely exist on the Apps Script
+ * classes. Anything else throws, so inventing an API (this caught a call to
+ * Sheet.getDataValidations, which only exists on Range) fails the test here
+ * instead of at setup time in Google.
+ */
+const SHEET_API = new Set(['getName', 'getMaxRows', 'getMaxColumns', 'clear',
+  'clearConditionalFormatRules', 'setTabColor', 'setHiddenGridlines', 'setFrozenRows',
+  'setFrozenColumns', 'setColumnWidth', 'setRowHeight', 'hideColumns',
+  'setConditionalFormatRules', 'insertRowBefore', 'setActiveRange', 'getRange',
+  'getActiveRange', 'name']);
+
+const RANGE_API = new Set(['setValues', 'setValue', 'setBackground', 'setFontColor',
+  'setFontFamily', 'setFontSize', 'setFontWeight', 'setFontStyle', 'setVerticalAlignment',
+  'setHorizontalAlignment', 'setBorder', 'setNumberFormat', 'setWrap', 'merge',
+  'clearContent', 'clearDataValidations', 'getValues', 'getValue', 'getRow',
+  'setDataValidation', 'insertCheckboxes', 'setFormula', 'setFormulas']);
+
+function guard(target, allowed, label) {
+  return new Proxy(target, {
+    get(obj, prop) {
+      if (typeof prop === 'symbol' || prop === 'then' || prop === 'inspect') return undefined;
+      if (!allowed.has(prop)) {
+        throw new TypeError(`${label}.${String(prop)} is not a real Apps Script method`);
+      }
+      return obj[prop];
+    },
+  });
+}
+
 function makeRange(sheet, row, col, nRows, nCols) {
   const r = {
     setValues: () => r, setValue: () => r, setBackground: () => r, setFontColor: () => r,
@@ -23,14 +53,14 @@ function makeRange(sheet, row, col, nRows, nCols) {
       return r;
     },
   };
-  return r;
+  return guard(r, RANGE_API, 'Range');
 }
 
 function makeSheet(name) {
   const sh = {
     name,
     getName: () => name, getMaxRows: () => 300, getMaxColumns: () => 30,
-    clear: () => sh, clearConditionalFormatRules: () => sh, getDataValidations: () => [],
+    clear: () => sh, clearConditionalFormatRules: () => sh,
     setTabColor: () => sh, setHiddenGridlines: () => sh, setFrozenRows: () => sh,
     setFrozenColumns: () => sh, setColumnWidth: () => sh, setRowHeight: () => sh,
     hideColumns: () => sh, setConditionalFormatRules: () => sh, insertRowBefore: () => sh,
@@ -39,7 +69,7 @@ function makeSheet(name) {
       ? makeRange(sh, 1, 1, 1, 1)
       : makeRange(sh, a, b, c || 1, d || 1)),
   };
-  return sh;
+  return guard(sh, SHEET_API, 'Sheet');
 }
 
 const sheets = new Map();
@@ -76,7 +106,11 @@ console.log('generated STASH formulas, row 2');
 is('unit', f('STASH!9,2'), '=IFERROR(INDEX(CUBE!$B$5:$B$11,MATCH(B2,CUBE!$A$5:$A$11,0)),"")');
 is('percent', f('STASH!10,2'), '=IF(E2="Finished",1,IFERROR(G2/H2,""))');
 is('bar', f('STASH!11,2'), '=IF(J2="","",REPT("█",ROUND(J2*12,0))&REPT("░",12-ROUND(J2*12,0)))');
-is('rarity', f('STASH!14,2'), '=IFS(M2="","",M2>=5,"Unique",M2>=4,"Set",M2>=3,"Rare",M2>=2,"Magic",TRUE,"Normal")');
+is('rarity coerces before comparing', f('STASH!14,2'),
+   '=IF(M2="","",IFS(IFERROR(VALUE(M2),-1)<0,"",IFERROR(VALUE(M2),-1)>=5,"Unique",' +
+   'IFERROR(VALUE(M2),-1)>=4,"Set",IFERROR(VALUE(M2),-1)>=3,"Rare",' +
+   'IFERROR(VALUE(M2),-1)>=2,"Magic",TRUE,"Normal"))');
+is('a text rating cannot reach a high tier', f('STASH!14,2').includes('VALUE(M2)'), true);
 is('rank', f('STASH!22,2'), '=IF($E2="In Progress",COUNTIFS($E$2:$E2,"In Progress"),"")');
 
 console.log('\nlast row is armed too');

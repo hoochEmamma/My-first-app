@@ -104,6 +104,17 @@ function stepFor(type) {
   return STEP[type] || 1;
 }
 
+/**
+ * Rarity for one row. VALUE() guards the case where a rating lands as text -
+ * Sheets sorts text above every number, so a bare "4.5">=5 would read TRUE and
+ * quietly promote it to Unique.
+ */
+function rarityFormula_(r) {
+  const v = 'IFERROR(VALUE(M' + r + '),-1)';
+  return '=IF(M' + r + '="","",IFS(' + v + '<0,"",' + v + '>=5,"Unique",' + v +
+    '>=4,"Set",' + v + '>=3,"Rare",' + v + '>=2,"Magic",TRUE,"Normal"))';
+}
+
 /* ================================== menu ================================== */
 
 function onOpen() {
@@ -157,7 +168,6 @@ function resetSheet_(ss, name) {
   if (!sh) sh = ss.insertSheet(name);
   sh.clear();
   sh.clearConditionalFormatRules();
-  sh.getDataValidations();          // no-op read; validations are cleared per range below
   if (sh.getMaxRows() > 1) sh.getRange(1, 1, sh.getMaxRows(), sh.getMaxColumns()).clearDataValidations();
   sh.setTabColor(C.rule);
   sh.setHiddenGridlines(true);
@@ -235,8 +245,7 @@ function buildStash_(ss) {
     pct.push(['=IF(E' + r + '="Finished",1,IFERROR(G' + r + '/H' + r + ',""))']);
     bar.push(['=IF(J' + r + '="","",REPT("█",ROUND(J' + r + '*' + BAR_LEN + ',0))&REPT("░",' +
       BAR_LEN + '-ROUND(J' + r + '*' + BAR_LEN + ',0)))']);
-    rarity.push(['=IFS(M' + r + '="","",M' + r + '>=5,"Unique",M' + r + '>=4,"Set",M' + r +
-      '>=3,"Rare",M' + r + '>=2,"Magic",TRUE,"Normal")']);
+    rarity.push([rarityFormula_(r)]);
     rank.push(['=IF($E' + r + '="In Progress",COUNTIFS($E$2:$E' + r + ',"In Progress"),"")']);
   }
   sh.getRange(2, COL.unit, unit.length, 1).setFormulas(unit).setFontColor(C.muted).setFontStyle('italic');
@@ -528,8 +537,7 @@ function restoreFormulas_(sh, r) {
   sh.getRange(r, COL.pct).setFormula('=IF(E' + r + '="Finished",1,IFERROR(G' + r + '/H' + r + ',""))');
   sh.getRange(r, COL.bar).setFormula('=IF(J' + r + '="","",REPT("█",ROUND(J' + r + '*' + BAR_LEN +
     ',0))&REPT("░",' + BAR_LEN + '-ROUND(J' + r + '*' + BAR_LEN + ',0)))');
-  sh.getRange(r, COL.rarity).setFormula('=IFS(M' + r + '="","",M' + r + '>=5,"Unique",M' + r +
-    '>=4,"Set",M' + r + '>=3,"Rare",M' + r + '>=2,"Magic",TRUE,"Normal")');
+  sh.getRange(r, COL.rarity).setFormula(rarityFormula_(r));
   sh.getRange(r, COL.rank).setFormula('=IF($E' + r + '="In Progress",COUNTIFS($E$2:$E' + r + ',"In Progress"),"")');
 }
 
