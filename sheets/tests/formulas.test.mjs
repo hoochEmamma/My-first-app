@@ -75,6 +75,17 @@ function makeSheet(name) {
 const sheets = new Map();
 const chain = () => { const o = new Proxy({}, { get: (_, p) => (p === 'build' ? () => ({}) : () => chain()) }); return o; };
 
+const menus = [];
+function recordingMenu() {
+  const items = [];
+  const m = {
+    addItem: (label, fn) => { items.push({ label, fn }); return m; },
+    addSeparator: () => m,
+    addToUi: () => { menus.push(items); return m; },
+  };
+  return m;
+}
+
 const SpreadsheetApp = {
   getActive: () => ({
     getSheetByName: (n) => sheets.get(n) || null,
@@ -85,7 +96,7 @@ const SpreadsheetApp = {
   newDataValidation: () => chain(),
   newConditionalFormatRule: () => chain(),
   BorderStyle: { SOLID: 'SOLID' },
-  getUi: () => ({ alert: () => {}, createMenu: () => chain() }),
+  getUi: () => ({ alert: () => {}, createMenu: () => recordingMenu() }),
 };
 
 const src = readFileSync(new URL('../Code.gs', import.meta.url).pathname, 'utf8');
@@ -138,6 +149,27 @@ is('no CHARACTER formula references a missing sheet',
 console.log('\ndropdowns and checkboxes landed');
 is('four dropdown columns', recorded.validations.map(v => v.col).sort((a, b) => a - b), [2, 5, 6, 13]);
 is('favourite is a checkbox', recorded.checkboxRanges.map(c => c.col), [19]);
+
+console.log('\nfirst-run menu');
+const X2 = vm.runInContext('({onOpen});', ctx);
+
+// Sheets already built by the calls above: the full menu should appear.
+menus.length = 0;
+X2.onOpen();
+const builtMenu = menus[0].map(i => i.fn);
+is('built sheet offers the sidebar first', builtMenu[0], 'showSidebar');
+is('built sheet offers every action', builtMenu.includes('setupShelf') && builtMenu.includes('clearExamples'), true);
+
+// Now pretend nothing has been built yet.
+sheets.delete('STASH');
+menus.length = 0;
+X2.onOpen();
+const freshMenu = menus[0];
+is('fresh sheet offers exactly two items', freshMenu.length, 2);
+is('first item builds the sheet', freshMenu[0].fn, 'setupShelf');
+is('first item says where to start', /START HERE/i.test(freshMenu[0].label), true);
+is('fresh sheet does not offer actions with nothing to act on',
+   freshMenu.some(i => ['showSidebar', 'advanceSelected', 'clearExamples'].includes(i.fn)), false);
 
 console.log(`\n${pass} passed, ${bad.length} failed`);
 export default bad.length;

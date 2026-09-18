@@ -118,9 +118,21 @@ function rarityFormula_(r) {
 /* ================================== menu ================================== */
 
 function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu('⚔ SHELF')
-    .addItem('Open the stash panel', 'showSidebar')
+  const ss = SpreadsheetApp.getActive();
+  const built = !!ss.getSheetByName(STASH);
+  const menu = SpreadsheetApp.getUi().createMenu('⚔ SHELF');
+
+  // Before the first build there is nothing to act on, so offer only the step
+  // that matters and say plainly that it comes first.
+  if (!built) {
+    menu.addItem('⭐ BUILD THE SHEET (start here)', 'setupShelf')
+      .addSeparator()
+      .addItem('Set API keys', 'setKeys')
+      .addToUi();
+    return;
+  }
+
+  menu.addItem('Open the stash panel', 'showSidebar')
     .addSeparator()
     .addItem('Advance selected row', 'advanceSelected')
     .addItem('Mark selected finished', 'finishSelected')

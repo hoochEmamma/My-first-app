@@ -9,14 +9,20 @@ there is nothing to upload and no file to convert.
 1. Make a blank spreadsheet at [sheets.new](https://sheets.new).
 2. **Extensions → Apps Script.**
 3. Replace the contents of `Code.gs` with this folder's `Code.gs`.
-4. **File → + → HTML**, name it exactly `Sidebar`, and paste in `Sidebar.html`.
-5. Save, then pick `setupShelf` from the function dropdown and press **Run**.
-   Google will ask for permission the first time — it needs to edit this
-   spreadsheet and to call the lookup APIs.
-6. Reload the spreadsheet. A **⚔ SHELF** menu appears.
+4. **File → + → HTML**, name it exactly `Sidebar` (Apps Script adds the `.html`
+   itself — a file called `Sidebar.html.html` is the usual mistake), and paste in
+   `Sidebar.html`.
+5. Save with Ctrl/Cmd+S.
+6. Go back to the spreadsheet tab and **reload the page**.
+7. **⚔ SHELF → ⭐ BUILD THE SHEET (start here).** Approve the permission prompt;
+   the "Google hasn't verified this app" screen is expected for a script you
+   pasted yourself — *Advanced* → *Go to … (unsafe)* → *Allow*.
+8. Reload once more. The full menu appears.
 
-The name matters in step 4: `HtmlService.createHtmlOutputFromFile('Sidebar')`
-looks for a file called `Sidebar`, and Apps Script adds the `.html` itself.
+There is no need to touch the function dropdown or the **Run** button in the
+editor. The menu is built by `onOpen`, which is a simple trigger and needs no
+authorization, so it shows up on reload whether or not the sheet has been built
+yet. Before the first build the menu deliberately offers only the build step.
 
 ## The four tabs
 
