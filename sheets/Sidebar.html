@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --void: #0a0806;
+      --panel: #16120d;
+      --panel-2: #1f1913;
+      --rule: #6b5a3e;
+      --gold: #c7b377;
+      --gold-bright: #e6c757;
+      --parchment: #e8e0d0;
+      --muted: #8a7b63;
+      --blood: #a33a3a;
+      --blood-deep: #4a1818;
+      --normal: #e8e0d0;
+      --magic: #7d7dff;
+      --rare: #ffff6e;
+      --set: #22c022;
+      --unique: #bfa76a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 13px;
+      color: var(--parchment);
+      /* Stone, lit from above. */
+      background:
+        radial-gradient(120% 80% at 50% -10%, #241c14 0%, rgba(36,28,20,0) 60%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 2px, rgba(0,0,0,.02) 2px 4px),
+        var(--void);
+      background-attachment: fixed;
+    }
+
+    .frame { padding: 10px 10px 28px; }
+
+    /* ------------------------------ header ------------------------------ */
+
+    header { text-align: center; padding: 6px 0 14px; }
+
+    .sigil {
+      font-size: 20px;
+      color: var(--blood);
+      text-shadow: 0 0 12px rgba(163,58,58,.6);
+      line-height: 1;
+    }
+
+    h1 {
+      font-family: Cinzel, Georgia, serif;
+      font-size: 24px;
+      letter-spacing: .34em;
+      margin: 4px 0 2px;
+      padding-left: .34em;
+      font-weight: 700;
+      color: var(--gold-bright);
+      text-shadow: 0 0 14px rgba(230,199,87,.28), 0 2px 0 #000;
+    }
+
+    .tag {
+      margin: 0;
+      font-size: 10px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .divider {
+      height: 1px;
+      margin: 10px 2px;
+      background: linear-gradient(90deg, transparent, var(--rule) 22%, var(--gold) 50%, var(--rule) 78%, transparent);
+      opacity: .75;
+    }
+
+    /* ------------------------------ panels ------------------------------ */
+
+    .panel {
+      position: relative;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.028), rgba(0,0,0,.25)),
+        var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      padding: 12px 11px 13px;
+      margin-bottom: 12px;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.65), 0 3px 10px rgba(0,0,0,.55);
+    }
+
+    .panel h2 {
+      font-family: Cinzel, Georgia, serif;
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin: 0 0 10px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(107,90,62,.5);
+      text-align: center;
+    }
+
+    /* ---------------------------- equipped ------------------------------ */
+
+    .eq-title { font-size: 15px; font-weight: bold; color: var(--parchment); line-height: 1.25; }
+    .eq-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .bar {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      letter-spacing: 1px;
+      color: var(--gold-bright);
+      margin: 9px 0 3px;
+      text-shadow: 0 0 8px rgba(230,199,87,.35);
+      word-break: break-all;
+    }
+
+    .bar-meta { font-size: 11px; color: var(--muted); }
+
+    .acts { display: flex; gap: 6px; margin-top: 11px; flex-wrap: wrap; }
+
+    /* ---------------------------- controls ------------------------------ */
+
+    button {
+      font-family: Cinzel, Georgia, serif;
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: linear-gradient(180deg, var(--panel-2), #120e0a);
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      padding: 7px 11px;
+      cursor: pointer;
+    }
+
+    button:hover:not(:disabled) {
+      color: var(--gold-bright);
+      border-color: var(--gold);
+      box-shadow: 0 0 9px rgba(199,179,119,.25), inset 0 0 9px rgba(199,179,119,.08);
+    }
+
+    button:disabled { opacity: .4; cursor: not-allowed; }
+
+    button.primary {
+      color: #f3e4b4;
+      background: linear-gradient(180deg, #5c2020, var(--blood-deep));
+      border-color: #8a4a3a;
+    }
+
+    button.primary:hover:not(:disabled) {
+      border-color: var(--blood);
+      box-shadow: 0 0 11px rgba(163,58,58,.45);
+    }
+
+    input {
+      width: 100%;
+      font-family: Georgia, serif;
+      font-size: 13px;
+      color: var(--parchment);
+      background: #0c0907;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      padding: 8px 9px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,.8);
+    }
+
+    input:focus { outline: none; border-color: var(--gold); }
+    input::placeholder { color: #5b503f; font-style: italic; }
+
+    .types { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 9px; }
+
+    .type {
+      font-family: Georgia, serif;
+      font-size: 10.5px;
+      letter-spacing: .02em;
+      text-transform: none;
+      padding: 5px 8px;
+    }
+
+    .type.on {
+      color: #1a1208;
+      background: linear-gradient(180deg, var(--gold-bright), #9c8038);
+      border-color: var(--gold-bright);
+      font-weight: bold;
+    }
+
+    .type.locked { color: #6b5f4c; border-color: #3a3125; }
+
+    .seek { display: flex; gap: 6px; }
+    .seek input { flex: 1; }
+
+    .dest { display: flex; align-items: center; gap: 7px; margin-top: 10px; }
+    .dest span { font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+    .seg { display: flex; gap: 4px; }
+    .seg { flex: 1; }
+    .seg button { padding: 5px 6px; font-size: 9px; letter-spacing: .06em; white-space: nowrap; }
+    .seg button.on { color: #1a1208; background: linear-gradient(180deg, var(--gold-bright), #9c8038); border-color: var(--gold-bright); }
+
+    /* ----------------------------- results ------------------------------ */
+
+    .msg { font-size: 11px; margin-top: 9px; min-height: 14px; color: var(--muted); font-style: italic; }
+    .msg.bad { color: #e08a8a; font-style: normal; }
+    .msg.good { color: var(--set); font-style: normal; }
+
+    ul.results { list-style: none; margin: 10px 0 0; padding: 0; }
+
+    .hit {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      width: 100%;
+      text-align: left;
+      padding: 7px;
+      margin-bottom: 4px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      text-transform: none;
+      letter-spacing: 0;
+      font-family: Georgia, serif;
+      font-size: 12px;
+      color: var(--parchment);
+    }
+
+    .hit:hover:not(:disabled) {
+      background: rgba(199,179,119,.07);
+      border-color: var(--rule);
+      box-shadow: none;
+      color: var(--parchment);
+    }
+
+    .hit img, .hit .noimg {
+      width: 38px;
+      min-width: 38px;
+      height: 56px;
+      object-fit: cover;
+      border: 1px solid var(--rule);
+      background: #0c0907;
+    }
+
+    .hit .noimg { display: flex; align-items: center; justify-content: center; color: #4d4235; font-size: 15px; }
+    .hit-body { min-width: 0; }
+    .hit-title { font-weight: bold; color: var(--gold); line-height: 1.25; }
+    .hit-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .legend { margin-top: 2px; font-size: 10px; color: var(--muted); text-align: center; line-height: 1.7; }
+    .legend b { font-weight: normal; }
+    .n-Normal { color: var(--normal); }
+    .n-Magic  { color: var(--magic); }
+    .n-Rare   { color: var(--rare); }
+    .n-Set    { color: var(--set); }
+    .n-Unique { color: var(--unique); }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <header>
+      <div class="sigil">&#9876;</div>
+      <h1>SHELF</h1>
+      <p class="tag">Stash Panel</p>
+    </header>
+
+    <div class="divider"></div>
+
+    <section class="panel">
+      <h2>Equipped</h2>
+      <div id="equipped">
+        <p class="eq-sub">Select a row in the STASH to see it here.</p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Seek</h2>
+      <div class="types" id="types"></div>
+      <div class="seek">
+        <input id="q" placeholder="Name your quarry&hellip;" autocomplete="off">
+        <button id="go" class="primary">Seek</button>
+      </div>
+      <div class="dest">
+        <span>Add as</span>
+        <div class="seg" id="dest"></div>
+      </div>
+      <div class="msg" id="msg"></div>
+      <ul class="results" id="results"></ul>
+    </section>
+
+    <div class="legend">
+      <b class="n-Normal">Normal</b> &middot; <b class="n-Magic">Magic</b> &middot;
+      <b class="n-Rare">Rare</b> &middot; <b class="n-Set">Set</b> &middot;
+      <b class="n-Unique">Unique</b><br>
+      Rarity is your rating. Five stars is a unique drop.
+    </div>
+  </div>
+
+  <script>
+    var TYPES = ['Book', 'TV Show', 'Movie', 'Video Game', 'Audiobook', 'Podcast', 'Comic / Manga'];
+    var DESTS = ['Want To', 'In Progress', 'Finished'];
+    var state = { type: 'Book', dest: 'Want To', status: {}, sel: null, busy: false };
+
+    function $(id) { return document.getElementById(id); }
+
+    function say(text, kind) {
+      var m = $('msg');
+      m.textContent = text || '';
+      m.className = 'msg' + (kind ? ' ' + kind : '');
+    }
+
+    /* ------------------------------ type row ------------------------------ */
+
+    function drawTypes() {
+      var box = $('types');
+      box.innerHTML = '';
+      TYPES.forEach(function (t) {
+        var info = state.status[t] || { supported: true, ready: true };
+        var b = document.createElement('button');
+        b.className = 'type' + (state.type === t ? ' on' : '') + (info.ready ? '' : ' locked');
+        b.textContent = t;
+        b.title = info.supported
+          ? (info.ready ? 'Search ' + t : 'Needs a ' + info.needs + ' - set it from the SHELF menu')
+          : 'No lookup source. Add these by hand in the STASH.';
+        b.onclick = function () {
+          state.type = t;
+          $('results').innerHTML = '';
+          drawTypes();
+          if (!info.supported) say('No lookup for ' + t + '. Add it by hand in the STASH.');
+          else if (!info.ready) say('Needs a ' + info.needs + '. Set it from the ⚔ SHELF menu.', 'bad');
+          else say('');
+        };
+        box.appendChild(b);
+      });
+    }
+
+    function drawDest() {
+      var box = $('dest');
+      box.innerHTML = '';
+      DESTS.forEach(function (d) {
+        var b = document.createElement('button');
+        b.className = state.dest === d ? 'on' : '';
+        b.textContent = d;
+        b.onclick = function () { state.dest = d; drawDest(); };
+        box.appendChild(b);
+      });
+    }
+
+    /* ------------------------------ equipped ------------------------------ */
+
+    function drawEquipped() {
+      var box = $('equipped');
+      var s = state.sel;
+      if (!s) {
+        box.innerHTML = '<p class="eq-sub">Select a row in the STASH to see it here.</p>';
+        return;
+      }
+      var pct = (s.pct === '' || s.pct === null) ? '' : Math.round(s.pct * 100) + '%';
+      var of = (s.current !== '' ? s.current : 0) + (s.total ? ' / ' + s.total : '') + (s.unit ? ' ' + s.unit : '');
+
+      box.innerHTML = '';
+      var t = document.createElement('div');
+      t.className = 'eq-title';
+      t.textContent = s.title;
+      if (s.rarity) t.style.color = 'var(--' + s.rarity.toLowerCase() + ')';
+
+      var sub = document.createElement('div');
+      sub.className = 'eq-sub';
+      sub.textContent = [s.type, s.status].filter(Boolean).join('  ·  ');
+
+      var bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.textContent = s.bar || '░'.repeat(12);
+
+      var meta = document.createElement('div');
+      meta.className = 'bar-meta';
+      meta.textContent = [of, pct].filter(Boolean).join('   ·   ');
+
+      var acts = document.createElement('div');
+      acts.className = 'acts';
+      var unitLabel = s.unit || '';
+      if (s.step === 1 && unitLabel.slice(-1) === 's') unitLabel = unitLabel.slice(0, -1);
+      acts.appendChild(act('+' + s.step + ' ' + unitLabel, function () {
+        run('advanceRow', [s.row], 'Advanced.', true);
+      }));
+      acts.appendChild(act('Vanquish', function () {
+        run('finishRow', [s.row], 'Marked finished.', true);
+      }));
+      acts.appendChild(act('Log', function () {
+        var note = prompt('Quest log - what happened?');
+        if (note) run('logRow', [s.row, note], 'Logged.', true);
+      }));
+
+      [t, sub, bar, meta, acts].forEach(function (el) { box.appendChild(el); });
+    }
+
+    function act(label, fn) {
+      var b = document.createElement('button');
+      b.textContent = label;
+      b.disabled = state.busy;
+      b.onclick = fn;
+      return b;
+    }
+
+    /* ------------------------------- search ------------------------------- */
+
+    function seek() {
+      var q = $('q').value.trim();
+      if (!q) return;
+      state.busy = true;
+      $('go').disabled = true;
+      say('Searching…');
+      google.script.run
+        .withSuccessHandler(function (hits) {
+          state.busy = false;
+          $('go').disabled = false;
+          drawHits(hits);
+        })
+        .withFailureHandler(function (err) {
+          state.busy = false;
+          $('go').disabled = false;
+          $('results').innerHTML = '';
+          say(String(err && err.message ? err.message : err), 'bad');
+        })
+        .searchTitles(state.type, q);
+    }
+
+    function drawHits(hits) {
+      var ul = $('results');
+      ul.innerHTML = '';
+      if (!hits || !hits.length) { say('Nothing found. Try another name, or add it by hand.'); return; }
+      say(hits.length + ' found. Pick one to add it to the ' + state.dest.toLowerCase() + ' pile.');
+
+      hits.forEach(function (h) {
+        var li = document.createElement('li');
+        var b = document.createElement('button');
+        b.className = 'hit';
+
+        if (h.cover) {
+          var img = document.createElement('img');
+          img.src = h.cover;
+          img.alt = '';
+          img.onerror = function () { img.replaceWith(placeholder()); };
+          b.appendChild(img);
+        } else {
+          b.appendChild(placeholder());
+        }
+
+        var body = document.createElement('div');
+        body.className = 'hit-body';
+        var title = document.createElement('div');
+        title.className = 'hit-title';
+        title.textContent = h.title;
+        var sub = document.createElement('div');
+        sub.className = 'hit-sub';
+        sub.textContent = [h.creator, h.year].filter(Boolean).join(' · ') || state.type;
+        body.appendChild(title);
+        body.appendChild(sub);
+        b.appendChild(body);
+
+        b.onclick = function () {
+          if (state.busy) return;
+          state.busy = true;
+          say('Adding “' + h.title + '”…');
+          google.script.run
+            .withSuccessHandler(function (res) {
+              state.busy = false;
+              say('Added “' + res.title + '” to row ' + res.row + '.', 'good');
+              refreshSelection();
+            })
+            .withFailureHandler(function (err) {
+              state.busy = false;
+              say(String(err && err.message ? err.message : err), 'bad');
+            })
+            .addResult(state.type, h, state.dest);
+        };
+
+        li.appendChild(b);
+        ul.appendChild(li);
+      });
+    }
+
+    function placeholder() {
+      var d = document.createElement('div');
+      d.className = 'noimg';
+      d.textContent = '❖';
+      return d;
+    }
+
+    /* ------------------------------ plumbing ------------------------------ */
+
+    function run(fn, args, okMsg, refresh) {
+      state.busy = true;
+      drawEquipped();
+      // Keep `this` bound to the runner - google.script.run's methods need it.
+      var runner = google.script.run
+        .withSuccessHandler(function () {
+          state.busy = false;
+          say(okMsg, 'good');
+          if (refresh) refreshSelection();
+        })
+        .withFailureHandler(function (err) {
+          state.busy = false;
+          say(String(err && err.message ? err.message : err), 'bad');
+          drawEquipped();
+        });
+      runner[fn].apply(runner, args);
+    }
+
+    function refreshSelection() {
+      google.script.run
+        .withSuccessHandler(function (sel) { state.sel = sel; drawEquipped(); })
+        .withFailureHandler(function () { /* leave the last known selection up */ })
+        .selectionInfo();
+    }
+
+    $('go').onclick = seek;
+    $('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') seek(); });
+
+    google.script.run.withSuccessHandler(function (s) {
+      state.status = s || {};
+      drawTypes();
+    }).lookupStatus();
+
+    drawTypes();
+    drawDest();
+    refreshSelection();
+    setInterval(refreshSelection, 5000);
+  </script>
+</body>
+</html>
